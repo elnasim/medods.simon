@@ -2,6 +2,8 @@
   <div id="app">
     <h1 class="title">Simon Says</h1>
 
+    <div class="game-status">{{ gameStatus }}</div>
+
     <div class="board" :class="isGameBlocked ? 'blocked' : ''">
       <div
         @click="userClickHandler(item.id)"
@@ -41,6 +43,8 @@ export default {
       isGameBlocked: true,
       isGameStarted: false,
       interval: null,
+      soundURL: '',
+      gameStatus: '',
       blocks: [
         {
           id: 1,
@@ -71,6 +75,7 @@ export default {
   },
   methods: {
     startGameHandler() {
+      this.gameStatus = 'Игра началась';
       this.round = 0;
       this.isGameStarted = true;
       clearInterval(this.interval);
@@ -94,11 +99,18 @@ export default {
       let i = 0;
       this.interval = setInterval(() => {
         const block = this.blocks.find((item) => item.id === this.gameData.gameGenerated[i]);
+
         block.isHighlight = true;
         setTimeout(() => {
           block.isHighlight = false;
         }, this.difficultyObj[this.difficulty] / 2);
+
+        this.soundURL = `/sounds/${this.gameData.gameGenerated[i]}.mp3`;
+        const audio = new Audio(this.soundURL);
+        audio.play();
+
         i++;
+
         if (i >= this.gameData.gameGenerated.length) {
           clearInterval(this.interval);
           this.isGameBlocked = false;
@@ -112,6 +124,10 @@ export default {
 
       const lastItem = this.gameData.userInput[this.gameData.userInput.length - 1];
       const block = this.blocks.find((item) => item.id === id);
+
+      this.soundURL = `/sounds/${id}.mp3`;
+      const audio = new Audio(this.soundURL);
+      audio.play();
 
       block.isHighlight = true;
       setTimeout(() => {
@@ -136,7 +152,7 @@ export default {
         gameGenerated: [],
         userInput: [],
       };
-      alert('Игра закончена');
+      this.gameStatus = 'Вы проиграли';
     },
 
     createGameData() {
@@ -212,4 +228,9 @@ export default {
   display: block
   margin: auto
   padding: 10px 20px
+
+.game-status
+  text-align: center
+  font-weight: bold
+  height: 40px
 </style>
